@@ -1,29 +1,73 @@
+"""Basic graph algorithms"""
 from collections import deque
 
 
-def breadth_first_search(G, s, with_prev=False):
+def breadth_first_search(G, s):
+    """Iterate over edges in a breadth-first-search (BFS)
+
+    Parameters
+    ----------
+    G: Graph
+
+    s: vertex
+        Starting node for the breadth-first search; this function
+        iterates over only those edges in the component reachable from
+        this node.
+
+    Yields
+    ------
+    (u, p, d): tuple of 3 elements
+        u: vertex
+            A vertex visited during the traversal.
+        p: vertex
+            Predcessor of vertex u in the traversal.
+        d: int
+            Shortest distance from s to u (minimum number of edges between s and u)
+
+    Examples
+    --------
+    >>> G = Graph([("A", "B"), ("B", "C"), ("B", "D"), ("B", "E"), ("C", "E")])
+    >>> print(list(breadth_first_search(G, "A")))
+    [('A', None, 0), ('B', 'A', 1), ('E', 'B', 2), ('C', 'B', 2), ('D', 'B', 2)]
+    """
     visited = set()
     queue = deque([(s, None, 0)])
     while queue:
         u, p, d = queue.popleft()
         if u not in visited:
             visited.add(u)
-            if with_prev:
-                yield u, p, d
-            else:
-                yield u, d
+            yield u, p, d
             for v in G.neighbors(u):
                 if v not in visited:
                     queue.append((v, u, d+1))
 
 
 def shortest_path(G, s, t):
+    """Return the shortest path between two vertices.
+
+    Parameters
+    ----------
+    G: Graph
+    s: vertex
+    t: vertex
+
+    Returns
+    -------
+    path: tuple
+        Tuple containing ordered vertices of a shortest path between s and t.
+
+    Examples
+    --------
+    >>> G = Graph([("A", "B"), ("B", "C"), ("B", "D"), ("B", "E"), ("C", "E")])
+    >>> print(shortest_path(G, "A", "E"))
+    ('A', 'B', 'E')
+    """
     prev = {}
-    for u, p, _ in breadth_first_search(G, s, with_prev=True):
+    for u, p, _ in breadth_first_search(G, t):
         prev[u] = p
-        if u == t:
+        if u == s:
             path = []
-            while t is not None:
-                path.append(t)
-                t = prev[t]
+            while s is not None:
+                path.append(s)
+                s = prev[s]
             return tuple(path)

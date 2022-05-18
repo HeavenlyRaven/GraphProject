@@ -1,8 +1,33 @@
+"""Class for Landmarks algorithms"""
+
 from random import sample
 from algorithms import breadth_first_search as bfs, shortest_path as sp
 
 
 class Landmarks:
+    """Class for Landmarks algorithms.
+
+    This class contains methods for shortest path distances
+    estimation based on algorithms using landmark vertices.
+
+    Parameters
+    ----------
+    G: Graph
+
+    k: int
+        Number of landmarks to select.
+
+    method: str
+        Landmark selection method:
+        'r'  : random selection
+        'hd' : highest degree
+        'bc' : best coverage
+
+    Examples
+    --------
+    >>> G = Graph([("A", "B"), ("B", "C"), ("B", "D"), ("B", "E"), ("C", "E")])
+    >>> L = Landmarks(G, 2, method='hd')
+    """
 
     def __init__(self, G, k, method='r'):
         self._graph = G
@@ -12,12 +37,12 @@ class Landmarks:
         self._dist = {}
         for l in self._landmarks:
             self._dist[l] = {}
-            for u, d in bfs(self._graph, l):
+            for u, _, d in bfs(self._graph, l):
                 self._dist[l][u] = d
 
     def __select_landmarks(self):
 
-        if self._number_of_landmarks > self._graph.number_of_vertices:
+        if self._number_of_landmarks > len(self._graph):
             raise ValueError("Number of landmarks is larger than the number of vertices")
         if self._selection_method == 'r':
             return sample(self._graph.vertices(), self._number_of_landmarks)
@@ -26,7 +51,7 @@ class Landmarks:
         elif self._selection_method == 'bc':
             L = []
             # TODO: Analyse different strategies of selection of M
-            M = self._graph.number_of_vertices
+            M = len(self._graph)
             P = set()
             # TODO: Analyse different strategies of sampling
             sample_pairs = zip(sample(self._graph.vertices(), M), sample(self._graph.vertices(), M))
@@ -51,7 +76,26 @@ class Landmarks:
             raise ValueError("Unknown landmarks selection method")
 
     def landmarks_basic(self, s, t):
-        d_approx = self._graph.number_of_vertices-1
+        """Landmarks-Basic algorithm
+
+        Parameters
+        ----------
+        s: vertex
+        t: vertex
+
+        Returns
+        -------
+        d_approx: int
+            Approximate shortest path distance between s and t
+
+        Examples
+        --------
+        >>> G = Graph([("A", "B"), ("B", "C"), ("B", "D"), ("B", "E"), ("C", "E")])
+        >>> L = Landmarks(G, 2, method='hd')
+        >>> print(L.landmarks_basic("A", "E"))
+        2
+        """
+        d_approx = len(self._graph)-1
         for dl in self._dist.values():
             d_estimate = dl[s] + dl[t]
             if d_estimate < d_approx:
