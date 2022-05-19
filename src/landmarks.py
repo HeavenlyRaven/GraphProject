@@ -46,34 +46,22 @@ class Landmarks:
             raise ValueError("Number of landmarks is larger than the number of vertices")
         if self._selection_method == 'r':
             return sample(self._graph.vertices(), self._number_of_landmarks)
-        elif self._selection_method == 'hd':
+        if self._selection_method == 'hd':
             return sorted(self._graph.vertices(), key=self._graph.degree)[-self._number_of_landmarks:]
-        elif self._selection_method == 'bc':
-            L = []
+        if self._selection_method == 'bc':
             # TODO: Analyse different strategies of selection of M
             M = len(self._graph)
-            P = set()
             # TODO: Analyse different strategies of sampling
             sample_pairs = zip(sample(self._graph.vertices(), M), sample(self._graph.vertices(), M))
+            c = {}
             for pair in sample_pairs:
-                P.add(sp(self._graph, *pair))
-            VP = set().union(*map(set, P))
-            for i in range(self._number_of_landmarks):
-                c = {}
-                for v in VP:
-                    for p in P:
-                        if v in p:
-                            try:
-                                c[v] += 1
-                            except KeyError:
-                                c[v] = 1
-                l = max(c, key=lambda u: c[u])
-                # Not removing the paths but instead removing the landmark from the set
-                VP.remove(l)
-                L.append(l)
-            return L
-        else:
-            raise ValueError("Unknown landmarks selection method")
+                for v in sp(self._graph, *pair):
+                    try:
+                        c[v] += 1
+                    except KeyError:
+                        c[v] = 1
+            return sorted(c.keys(), key=c.get)[-self._number_of_landmarks:]
+        raise ValueError("Unknown landmarks selection method")
 
     def landmarks_basic(self, s, t):
         """Landmarks-Basic algorithm
