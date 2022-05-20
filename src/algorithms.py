@@ -16,19 +16,20 @@ def breadth_first_search(G, s):
 
     Yields
     ------
-    (u, p, d): tuple of 3 elements
+    (u, data): tuple of 2 elements
         u: vertex
             A vertex visited during the traversal.
-        p: vertex
-            Predcessor of vertex u in the traversal.
-        d: int
-            Shortest distance from s to u (minimum number of edges between s and u)
+        data: tuple of 2 elements
+            p: vertex
+                Predcessor of vertex u in the traversal.
+            d: int
+                Shortest distance from s to u (minimum number of edges between s and u)
 
     Examples
     --------
     >>> G = Graph([("A", "B"), ("B", "C"), ("B", "D"), ("B", "E"), ("C", "E")])
     >>> print(list(breadth_first_search(G, "A")))
-    [('A', None, 0), ('B', 'A', 1), ('E', 'B', 2), ('C', 'B', 2), ('D', 'B', 2)]
+    [('A', (None, 0)), ('B', ('A', 1)), ('E', ('B', 2)), ('C', ('B', 2)), ('D', ('B', 2))]
     """
     visited = set()
     queue = deque([(s, None, 0)])
@@ -36,7 +37,7 @@ def breadth_first_search(G, s):
         u, p, d = queue.popleft()
         if u not in visited:
             visited.add(u)
-            yield u, p, d
+            yield u, (p, d)
             for v in G.neighbors(u):
                 if v not in visited:
                     queue.append((v, u, d+1))
@@ -63,8 +64,8 @@ def shortest_path(G, s, t):
     ('A', 'B', 'E')
     """
     prev = {}
-    for u, p, _ in breadth_first_search(G, t):
-        prev[u] = p
+    for u, data in breadth_first_search(G, t):
+        prev[u] = data[0]
         if u == s:
             path = []
             while s is not None:
