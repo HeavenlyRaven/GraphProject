@@ -1,6 +1,7 @@
 """Class for Landmarks algorithms"""
-
+import timeit
 from random import sample
+
 from algorithms import breadth_first_search as bfs, shortest_path as sp
 
 
@@ -37,14 +38,19 @@ class Landmarks:
         self._data = {l: dict(bfs(self._graph, l)) for l in self._landmarks}
 
     def __select_landmarks(self):
-
         if self._number_of_landmarks > len(self._graph):
             raise ValueError("Number of landmarks is larger than the number of vertices")
         if self._selection_method == 'r':
+            # random
+
             return sample(self._graph.vertices(), self._number_of_landmarks)
         if self._selection_method == 'hd':
+            # highest degree
+
             return sorted(self._graph.vertices(), key=self._graph.degree)[-self._number_of_landmarks:]
         if self._selection_method == 'bc':
+            # best coverage
+
             # TODO: Analyse different strategies of selection of M
             M = len(self._graph)
             # TODO: Analyse different strategies of sampling
@@ -79,7 +85,7 @@ class Landmarks:
         >>> print(L.landmarks_basic("A", "E"))
         2
         """
-        d_approx = len(self._graph)-1
+        d_approx = len(self._graph) - 1
         for dl in self._data.values():
             d_estimate = dl[s][1] + dl[t][1]
             if d_estimate < d_approx:
@@ -116,11 +122,11 @@ class Landmarks:
         >>> print(L.landmarks_lca("A", "E"))
         2
         """
-        d_approx = len(self._graph)-1
+        d_approx = len(self._graph) - 1
         for l in self._landmarks:
             path_1 = self.__path_to(l, s, (l,))
             path_2 = self.__path_to(l, t, path_1)
-            path_3 = self.__path_to(l, s, (path_2[-1], ))
+            path_3 = self.__path_to(l, s, (path_2[-1],))
             d_estimate = len(path_2) + len(path_3) - 2
             if d_estimate < d_approx:
                 d_approx = d_estimate
